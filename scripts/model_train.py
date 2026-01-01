@@ -7,23 +7,25 @@ def train_step(model: torch.nn.Module,
                loss_fn: torch.nn.Module, 
                optimizer: torch.optim.Optimizer,
                device: torch.device) -> Tuple[float, float]:
-    """    Performs one training epoch over a dataset. Returns training loss and accuracy
+    """    Performs one training epoch over a dataset. Returns training loss and accuracy for classification problems
     """
     model.train()
     
     train_loss, train_acc = 0, 0
     
-    for batch, (X,y) in enumerate(dataloader):
+    for X,y in dataloader:
         X, y = X.to(device), y.to(device)
         
         y_pred=model(X)
+        
         loss = loss_fn(y_pred, y)
         train_loss += loss.item() 
+        
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         
-        y_pred_class = torch.argmax(torch.softmax(y_pred, dim=1), dim=1)
+        y_pred_class = torch.argmax(y_pred, dim=1)
         train_acc += (y_pred_class == y).sum().item()/len(y_pred)
         
     train_loss = train_loss / len(dataloader)
@@ -33,13 +35,18 @@ def train_step(model: torch.nn.Module,
 def test_step(model: torch.nn.Module, 
                dataloader: torch.utils.data.DataLoader, 
                loss_fn: torch.nn.Module, 
-               device: torch.device) -> Tuple[float, float]:
+               device: torch.device,) -> Tuple[float, float]:
+    """
+        Evaluates a model over a dataset without updating parameters.
+        
+        Returns average loss and accuracy for classification problems
+    """
     model.eval()
     
     test_loss, test_acc=0, 0
     
     with torch.inference_mode():
-        for batch, (X,y) in enumerate(dataloader):
+        for X,y in dataloader:
             X, y = X.to(device), y.to(device)
             
             test_pred_logits=model(X)
@@ -47,7 +54,7 @@ def test_step(model: torch.nn.Module,
             loss=loss_fn(test_pred_logits, y)
             test_loss+=loss.item()
             
-            test_pred_class = torch.argmax(torch.softmax(test_pred_logits,dim=1),dim=1)
+            test_pred_class = torch.argmax(test_pred_logits,dim=1)
             test_acc+=(test_pred_class==y).sum().item()/len(test_pred_logits)
             
         test_loss=test_loss/len(dataloader)
@@ -60,7 +67,11 @@ def train(model: torch.nn.Module,
                loss_fn: torch.nn.Module, 
                optimizer: torch.optim.Optimizer,
                epochs: int,
-               device: torch.device) -> Tuple[float, float]:
+               device: torch.device) -> Dict[str, List[float]]:
+    """ Train a PyTorch model for a specified number of epochs, tracking training and testing loss 
+    and accuracy for classification problems
+    """
+    
     results = {"train_loss": [],
       "train_acc": [],
       "test_loss": [],
@@ -83,8 +94,7 @@ def train(model: torch.nn.Module,
             f"train_loss: {train_loss:.4f} | "
             f"train_acc: {train_acc:.4f} | "
             f"test_loss: {test_loss:.4f} | "
-            f"test_acc: {test_acc:.4f}"
-        )
+            f"test_acc: {test_acc:.4f}")
     
         results["train_loss"].append(train_loss)
         results["train_acc"].append(train_acc)
