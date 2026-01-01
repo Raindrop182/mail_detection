@@ -1,7 +1,7 @@
 # Mail Delivery Detection
 
 ## Overview
-I created this project because I wanted to automatically detect when the mail arrived at my mailbox from security camera footage. To accomplish this, I utilized a ResNet18 model pretrained on ImageNet and trained it on my own data. I also trained a TinyVGG model on the MNIST dataset and custom data in order to identify the time stamp on my security camera footage. By the end, the model was able to parse a day's worth of camera footage under varying light and weather conditions, and identify when the mail truck arrived.
+I created this project because I wanted to automatically detect when the mail arrived at my mailbox from security camera footage. To accomplish this, I utilized a ResNet18 model pretrained on ImageNet and trained it on my own data. I also trained a TinyVGG model on the MNIST dataset and custom data in order to identify the time stamp on my security camera footage. By the end, the model was able to parse dozens of hours of camera footage under varying light and weather conditions to identify when the mail truck arrived.
 
 ![Sample Output](sample_images/sample_output.png)
 
@@ -10,7 +10,7 @@ I created this project because I wanted to automatically detect when the mail ar
 ![Sample Timestamp](sample_images/sample_timestamp.png)
 
 Every frame of security camera footage contains a timestamp in the upper left, which I wanted to be able to read. First, I utilized Pytesseract OCR to read the digits. However, this yielded low accuracy due to the noisiness and unique font of the timestamps, with the script often confusing 1s and 2s.
-My next solution was to create a TinyVGG model and train it on both the MNIST dataset and my own custom datasets extracted from my security camera footage, which resulted in much more accurate timestamp readings.
+My next solution was to create a TinyVGG model and train it on both the MNIST dataset and custom datasets extracted from my security camera footage, which resulted in much more accurate timestamp readings.
 
 - [read_num.py](scripts/read_num.py): contains functions to read a timestamp, and train and finetune a TinyVGG model to identify digits
 - [model_train.py](scripts/model_train.py): contains functions to train and test a given model
