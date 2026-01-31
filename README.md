@@ -10,7 +10,8 @@ I created this project because I wanted to automatically detect when the mail ar
 ![Sample Timestamp](sample_images/sample_timestamp.png)
 
 Every frame of security camera footage contains a timestamp in the upper left, which I wanted to be able to read. First, I utilized Pytesseract OCR to read the digits. However, this yielded low accuracy due to the noisiness and unique font of the timestamps, with the script often confusing 1s and 2s.
-My next solution was to create a TinyVGG model and train it on both the MNIST dataset and custom datasets extracted from my security camera footage, which resulted in much more accurate timestamp readings.
+
+My next solution was to create a TinyVGG model and train it on both the MNIST dataset and custom datasets extracted from my security camera footage, which resulted in much more accurate timestamp readings. I utilized the TinyVGG model because it is a small, lightweight CNN, suitable and highly accurate for small-scale digit recognition.
 
 - [read_num.py](scripts/read_num.py): contains functions to read a timestamp, and train and finetune a TinyVGG model to identify digits
 - [model_train.py](scripts/model_train.py): contains functions to train and test a given model
