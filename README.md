@@ -16,7 +16,7 @@ My next solution was to create a TinyVGG model and train it on both the MNIST da
 - [read_num.py](scripts/read_num.py): contains functions to read a timestamp, and train and finetune a TinyVGG model to identify digits
 - [model_train.py](scripts/model_train.py): contains functions to train and test a given model
 - [tinyvgg.py](scripts/tinyvgg.py): contains TinyVGG model architecture, copied from https://poloclub.github.io/cnn-explainer/
-### 2. Preparing the training data
+### 2. Generating the training data
 Before training a model to classify whether the mail truck appeared in an image or not, I needed to prepare training data. Rather than manually parsing hours of security camera footage for frames that contained a  mail truck, I slightly automated the process by utilizing the YOLOv5 framework to identify frames that contained a truck. This significantly narrowed down the number of frames I had to manually parse and sort.
 
 - [create_training_datasets.py](scripts/create_training_datasets.py): contains a function to save frames of a video containing a truck, utilizing YOLOv5
