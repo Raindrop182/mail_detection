@@ -17,7 +17,6 @@ def create_data():
     
     frame_num = 0
     
-    # cough=False
     while frame_num < total_frames:
         print(frame_num)
         cap.set(cv.CAP_PROP_POS_FRAMES, frame_num)
