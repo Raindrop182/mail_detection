@@ -12,7 +12,7 @@ import torch
 from tinyvgg import TinyVGG
 from model_train import train
 
-def train_readnum_model():
+def train_readnum_model_MNIST():
     """
     Train a TinyVGG model on the MNIST dataset for handwritten digit recognition.
     """
@@ -58,7 +58,7 @@ def train_readnum_model():
     output_path=Path(__file__).parent.parent / "models" / "number_recognition_model.pth"
     torch.save(obj=model.state_dict(),f=output_path)
 
-def finetune():
+def finetune_readnum_model():
     """
     Fine-tune a pre-trained TinyVGG model on a custom dataset for digit recognition.
 
@@ -105,14 +105,14 @@ def finetune():
 
 def segment_digits(frame):
     """
-    Extract individual digit images from a video frame.
+    Extract individual digit images from a video frame, from a prefixed location (upper left corner)
 
     """
-    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY) #convert frame to grayscale
     
-    thresh_val=240 if gray.mean()>100 else 220
+    thresh_val=240 if gray.mean()>100 else 220 #adaptive thresholding: if it's a bright day, have a higher threshold value
     
-    _, bw = cv.threshold(gray, thresh_val, 255, cv.THRESH_BINARY_INV)
+    _, bw = cv.threshold(gray, thresh_val, 255, cv.THRESH_BINARY) #set all pixels above thresh_val to 255, and pixels below thresh_val to 255
     
     digits=[]
     digits.append(bw[5:50,260:290])
@@ -122,14 +122,11 @@ def segment_digits(frame):
     digits.append(bw[5:50,405:430])
     digits.append(bw[5:50,430:455])
     
-    digits=[255-digit for digit in digits]
-
     return digits
 
 def read_num(image: np.ndarray, model):
     """
     Recognize a multi-digit number from an image using a trained neural network model.
-
     """
     digits=segment_digits(image)
     
@@ -138,12 +135,8 @@ def read_num(image: np.ndarray, model):
     transform=transforms.Compose([transforms.ToTensor(),
                                    transforms.Normalize((0.5,), (0.5,))
                                    ])
-    
     digits=[transform(cv.resize(digit,(28,28))) for digit in digits]
     digits = torch.stack(digits).to(device)
-    # for digit in digits:
-    #     plt.imshow(digit.squeeze(), cmap='gray')
-    #     plt.show()
     
     model.eval()
     with torch.inference_mode():
@@ -151,7 +144,11 @@ def read_num(image: np.ndarray, model):
         
     nums=[]
     for output in outputs:
-        num=torch.argmax(torch.softmax(output,dim=0),dim=0).item()
+        num=torch.argmax(output,dim=0).item()
         nums.append(num)
 
     return f"{nums[0]}{nums[1]}-{nums[2]}{nums[3]}-{nums[4]}{nums[5]}"
+
+if __name__ == "__main__":
+    train_readnum_model_MNIST() #create, train, and save a tinyVGG model for number recognition using MNIST dataset
+    finetune_readnum_model() #finetuen the saved model on a custom dataset
