@@ -64,7 +64,7 @@ def mail_in_frame(image: np.ndarray, model):
          transforms.Resize((224, 224))
      ])
     
-    image=transform(image).unsqueeze(dim=0)
+    image=transform(image).unsqueeze(dim=0).to(device)
     
     model.eval()
     with torch.inference_mode():
@@ -73,7 +73,7 @@ def mail_in_frame(image: np.ndarray, model):
     result=torch.argmax(outputs,dim=1).item()
     return result==0
 
-def identify_mail_in_video(video_path: str, model,save_image_path):
+def identify_mail_in_video(video_path: str, mail_model, digit_model, save_image_path):
     """
     Parse video footage to identify when the mail arrives.
     Saves a snapshot of the mail truck and returns the time stamp of when the mail arrived
@@ -92,9 +92,9 @@ def identify_mail_in_video(video_path: str, model,save_image_path):
         
         frame = frame[0:600,0:700] #only look at subsection of frame with mailbox
         
-        model.eval()
+        mail_model.eval()
         with torch.inference_mode():
-            is_mail = mail_in_frame(frame,model)
+            is_mail = mail_in_frame(frame,mail_model)
             
         if is_mail:
             cap.release()
@@ -103,9 +103,7 @@ def identify_mail_in_video(video_path: str, model,save_image_path):
             date=os.path.splitext(os.path.basename(video_path))[0]
             cv.imwrite(save_image_path+date+".png",frame)
             
-            model = TinyVGG(input_shape=1,hidden_units=10,output_shape=10)
-            model.load_state_dict(torch.load("finetuned_number_recognition_model.pth"))
-            return read_num(frame,model)
+            return read_num(frame,digit_model)
         
         frame_num+=100
         pbar.update(100)
@@ -116,9 +114,12 @@ def identify_mail_in_video(video_path: str, model,save_image_path):
  
     
 # # train_mail_model()
-# model = models.resnet18(weights="IMAGENET1K_V1")
-# model.fc = nn.Linear(model.fc.in_features, 2)
-# model.load_state_dict(torch.load("mail_model.pth"))
+# mail_model = models.resnet18(weights="IMAGENET1K_V1")
+# mail_model.fc = nn.Linear(model.fc.in_features, 2)
+# mail_model.load_state_dict(torch.load("mail_model.pth"))
+
+#digit_model = TinyVGG(input_shape=1,hidden_units=10,output_shape=10)
+#digit_model.load_state_dict(torch.load("finetuned_number_recognition_model.pth"))
 
 # save_image_path="mail_images/"
 # os.makedirs(save_image_path, exist_ok=True)
@@ -129,7 +130,7 @@ def identify_mail_in_video(video_path: str, model,save_image_path):
 # print(files)
 # data={"date":[],"time":[]}
 # for video_name in files:
-#     time=identify_mail_in_video(video_name,model,save_image_path)
+#     time=identify_mail_in_video(video_name,mail_model,digit_model,save_image_path)
 #     date=os.path.splitext(os.path.basename(video_name))[0]
 #     print(date)
 #     print(time)
