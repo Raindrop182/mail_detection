@@ -27,7 +27,6 @@ Before training a model to classify whether the mail truck appeared in an image 
 I utilized a ResNet18 model pretrained on ImageNet and finetuned it using my own datasets. Finally, I combined both the timestamp-reading model and mail-identification model to parse through several months of security camera footage and document the time the mail truck arrived every day.
 
 - [identify_mail.py](scripts/identify_mail.py): contains functions to find and save the frames in a video that contain a mail truck
-> **Note:** Full datasets not included here to protect my privacy.
 
 ## Future Improvements
 - Integrate trained model into program to monitor live security camera footage and notify users when the mail has arrived
